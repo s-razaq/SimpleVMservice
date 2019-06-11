@@ -1,166 +1,202 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "User name for the Virtual Machine."
-      }
+    "Description": "stack descriptaon.....",
+    "Metadata" : {
+      "ItemName" : "Marks2 Simple VM",
+      "Version" : "1.0"
     },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Password for the Virtual Machine."
-      }
-    },
-    "ubuntuOSVersion": {
-      "type": "string",
-      "defaultValue": "16.04.0-LTS",
-      "allowedValues": [
-        "12.04.5-LTS",
-        "14.04.5-LTS",
-        "15.10",
-        "16.04.0-LTS"
-      ],
-      "metadata": {
-        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
-      }
-    },
-    "location": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Location for all resources."
-      }
-    }
-  },
-  "variables": {
-    "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'salinuxvm')]",
-    "imagePublisher": "Canonical",
-    "imageOffer": "UbuntuServer",
-    "nicName": "myVMNic",
-    "addressPrefix": "10.0.0.0/16",
-    "subnetName": "Subnet",
-    "subnetPrefix": "10.0.0.0/24",
-    "storageAccountType": "Standard_LRS",
-    "publicIPAddressType": "Dynamic",
-    "vmName": "MCSDemoVM",
-    "vmSize": "Standard_A1",
-    "virtualNetworkName": "MyVNET",
-    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
-  },
-  "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountName')]",
-      "apiVersion": "2018-07-01",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[variables('storageAccountType')]"
-      },
-      "kind": "Storage",
-      "properties": {}
-    },
-    {
-      "apiVersion": "2018-10-01",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+    "Parameters": {
+        "AMI": {
+            "Default": "ami-009206733e12ce518",
+            "Description": "The Amazon Ubuntu AMI",
+            "Type": "String"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2018-10-01",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",       
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2018-10-01",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+        "EBSVolumeSize": {
+            "Default": "20",
+            "Description": "The size of the EBS volume",
+            "Type": "String"
         },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+        "InstanceName": {
+            "Default": "My instance name",
+            "Description": "EC2 Instance Name",
+            "Type": "String"
         },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('ubuntuOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "createOption": "FromImage"
-          },
-          "dataDisks": [
-            {
-              "diskSizeGB": 20,
-              "lun": 0,
-              "createOption": "Empty"
-            }
-          ]
+        "InstanceType": {
+            "AllowedValues": [
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "c4.large",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge",
+                "c4.8xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type",
+            "Default": "t2.micro",
+            "Description": "EC2 instance type",
+            "Type": "String"
         },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-            }
-          ]
+        "KeyName": {
+            "ConstraintDescription": "Must be the name of an existing EC2 KeyPair.",
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to NAT instances.",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2016-01-01').primaryEndpoints.blob)]"
-          }
+        "Subnet": {
+            "ConstraintDescription": "Must be a valid Subnet.",
+            "Description": "The subnet to place the instance in...",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "VPC": {
+            "ConstraintDescription": "Must be a valid VPC.",
+            "Description": "The VPC to deploy to...",
+            "Type": "AWS::EC2::VPC::Id"
         }
-      }
+    },
+    "Resources": {
+        "Instance": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "packages": {
+                            "apt": {
+                                "awscli": [],
+                                "ruby": [],
+                                "unzip": []
+                            }
+                        },
+                        "files": {
+                        "/tmp/sample.conf": {
+                            "content": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "write a sample file to OS and give permissions....   \n"
+                                    ]
+                                ]
+                            },
+                            "mode": "000644",
+                            "owner": "root",
+                            "group": "root"
+                          }
+
+                        },
+                        "commands": {
+                            "01update_pkgs": {
+                                "command": "apt-get update && apt-get upgrade -y"
+                            },
+                            "02install_ansible": {
+                                "command": "apt-get install ansible"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "VolumeSize": {
+                                "Ref": "EBSVolumeSize"
+                            }
+                        }
+                    }
+                ],
+                "ImageId": {
+                    "Ref": "AMI"
+                },
+                 "Tags" : [ {
+                     "Key" : "playbook",
+                     "Value" : "crmservice"
+                 } ],
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "Subnet"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "InstanceName"
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -xe\n",                                
+    	                        "apt-get update\n",
+                                "apt-get install ansible\n",
+                                "apt-get install -y python-setuptools\n",
+                                "mkdir -p /opt/aws/bin\n",
+                                "wget https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                                "easy_install --script-dir /opt/aws/bin aws-cfn-bootstrap-latest.tar.gz\n",
+                                " apt-get update\n",
+                                "/opt/aws/bin/cfn-init --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " -s ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " -r Instance\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+            },
+        "EIPAddress": {
+            "Type": "AWS::EC2::EIP"
+        },
+        "IPAssoc": {
+            "Type": "AWS::EC2::EIPAssociation",
+            "Properties": {
+                "InstanceId": {
+                    "Ref": "Instance"
+                },
+                "EIP": {
+                    "Ref": "EIPAddress"
+                }
+            }
+        },
+        "SecurityGroup": {
+            "Properties": {
+                "GroupDescription": "Allow SSH, HTTP, and HTTPS access",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        }
     }
-  ],
-  "outputs": {
-    "hostname": {
-      "type": "string",
-      "value": "Mark"
-    }
-  }
 }
