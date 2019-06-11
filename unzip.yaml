@@ -1,0 +1,5 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: install unzip
+      apt: name=unzip state=latest
