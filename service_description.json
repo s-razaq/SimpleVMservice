@@ -115,8 +115,8 @@
                     "Ref": "AMI"
                 },
                  "Tags" : [ {
-                     "Key" : "playbook",
-                     "Value" : "crmservice"
+                     "Key" : "Playbooks",
+                     "Value" : "unzip"
                  } ],
                 "InstanceType": {
                     "Ref": "InstanceType"
