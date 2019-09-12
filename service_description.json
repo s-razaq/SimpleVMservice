@@ -114,14 +114,6 @@
                 "ImageId": {
                     "Ref": "AMI"
                 },
-                 "Tags" : [ {
-                     "Key" : "Playbooks",
-                     "Value" : "unzip"
-                 },
-                 {
-                     "Key" : "author",
-                     "Value" : "drazan-premium"
-                 }],
                 "InstanceType": {
                     "Ref": "InstanceType"
                 },
@@ -142,6 +134,10 @@
                         "Value": {
                             "Ref": "InstanceName"
                         }
+                    },
+                    {
+                        "Key": "Playbooks",
+                        "Value": "unzip"
                     }
                 ],
                 "UserData": {
