@@ -5,4 +5,4 @@
        - image: circleci/python:3.6
      steps:
        - checkout
-       - run: echo "A first hello"
+       - run: python .circleci/updateService.py
