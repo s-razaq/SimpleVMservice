@@ -1,10 +1,10 @@
 {
-    "name": "2609marksService",
+    "name": "2609saqibsService",
     "description": "alpha",
     "version": "1.0",
     "serviceid": "8",
     "landscapeid": "1",
     "target": "aws",
-    "owner": "Mark Bongardt",
+    "owner": "Saqib Razaq",
     "publisher": "TSI"
 }
